@@ -1,29 +1,27 @@
-const userModel = require("../models/User.model");
+import UserModel from "../models/User.model.js";
 
-// Verificar se o usuário está logado
-module.exports = async (req, res, next) => {
+async function attachCurrentUser(req, res, next) {
   try {
-    const loggedUser = req.user;
+    //captura as informações que estão dentro do req.auth
+    const userData = req.auth;
 
-    const user = await userModel.findOne(
-      {
-        _id: loggedUser._id,
-      },
-      // Excluindo o hash da senha e versão da resposta que vai pro servidor, por segurança
-      { passwordHash: 0, __v: 0 }
-    );
+    const user = await UserModel.findById(userData._id, { passwordHash: 0 });
 
     if (!user) {
-      // retorna Bad Request
-      return res.status(400).json({ msg: "User does not exist!" });
+      return res.status(400).json({ msg: "Usuário não encontrado" });
     }
 
+    if (!user.userIsActive) {
+      return res.status(404).json({ msg: "User disable account." });
+    }
 
     req.currentUser = user;
 
     next();
   } catch (error) {
-    // retorna Internal Server Error
-    return res.status(500).json({ msg: error.msg });
+    console.log(error);
+    return res.status(500).json(error);
   }
-};
+}
+
+export default attachCurrentUser;

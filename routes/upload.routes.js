@@ -1,12 +1,12 @@
 //importar o express
-const express = require("express");
+import { Router } from "express";
 // instanciar as rotas pegando do express
-const router = express.Router();
+const router = Router();
 
-const isAuth = require("../middlewares/isAuth");
-const attachCurrentUser = require("../middlewares/attachCurrentUser");
+import isAuth from "../middlewares/isAuth.js";
+import attachCurrentUser from "../middlewares/attachCurrentUser.js";
 
-const uploadCloud = require("../config/cloudinary.config");
+import uploadImg from "../config/cloudinary.config.js";
 
 // Rota para enviar um arquivo de imagem.
 // O arquivo é enviado ao cloudinary, e retorna um link que será enviado ao server
@@ -14,7 +14,7 @@ router.post(
   "/image",
   isAuth,
   attachCurrentUser,
-  uploadCloud.single("picture"),
+  uploadImg.single("picture"),
   (req, res) => {
     const loggedUser = req.currentUser;
 
@@ -32,4 +32,4 @@ router.post(
   }
 );
 
-module.exports = router;
+export default router;

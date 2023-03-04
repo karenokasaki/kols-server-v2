@@ -1,12 +1,13 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 async function connect() {
   try {
+    mongoose.set("strictQuery", true);
     const dbConnection = await mongoose.connect(process.env.MONGODB_URI);
-    console.log("Conectado ao banco de dados:", dbConnection.connection.name);
+    console.log(`Connection on db: ${dbConnection.connection.name}`);
   } catch (error) {
     console.log(error);
   }
 }
 
-module.exports = connect;
+export default connect;

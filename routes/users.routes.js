@@ -1,22 +1,16 @@
-//importar o express
-const express = require("express");
-// instanciar as rotas pegando do express
-const router = express.Router();
-// Import middleware para validação de usuário
-const isAuth = require("../middlewares/isAuth");
-const attachCurrentUser = require("../middlewares/attachCurrentUser");
-// Import Bcrypt para criptografia da senha e reset password
-const bcrypt = require("bcrypt");
-// Import generateToken para gerar o Token de acesso e timeout
-const generateToken = require("../config/jwt.config");
-// Import model schema user
-const userModel = require("../models/User.model");
+import express from "express";
+import bcrypt from "bcrypt";
 
-// Define a quantidade de "saltos que serão adicionados a criptografia da senha"
+import isAuth from "../middlewares/isAuth.js";
+import attachCurrentUser from "../middlewares/attachCurrentUser.js";
+import generateToken from "../config/jwt.config.js";
+import userModel from "../models/User.model.js";
+
+const router = express.Router();
 const saltRounds = 10;
 
 // Rota para criar um novo usuário
-router.post("/create-user", async (req, res) => {
+router.post("/sign-up", async (req, res) => {
   try {
     const { password } = req.body;
 
@@ -108,22 +102,12 @@ router.get("/profile", isAuth, attachCurrentUser, async (req, res) => {
       return res.status(404).json({ msg: "User disable account." });
     }
 
-    // Verificar se o usuário está logado
-    if (loggedUser) {
-      const populateUser = await userModel
-        .findById(loggedUser._id)
-        .populate("business");
+    const populateUser = await userModel
+      .findById(loggedUser._id, { passwordHash: 0, __v: 0 })
+      .populate("business");
 
-      // Deleta o password e a versão no retorno da atualização
-      delete populateUser._doc.passwordHash;
-      delete populateUser._doc.__v;
-
-      // Retorna success quando o usuário esta logado
-      return res.status(200).json(populateUser);
-    } else {
-      // Retorna Not Found
-      return res.status(404).json({ msg: "User not found." });
-    }
+    // Retorna success quando o usuário esta logado
+    return res.status(200).json(populateUser);
   } catch (error) {
     // Retorna Internal Server Error
     return res.status(500).json({ msg: error.message });
@@ -210,4 +194,4 @@ router.patch(
   }
 );
 
-module.exports = router;
+export default router;

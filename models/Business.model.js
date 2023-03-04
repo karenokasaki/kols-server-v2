@@ -1,87 +1,91 @@
-const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
+import { Schema, model } from "mongoose";
 
-const BusinessSchema = new Schema({
-  corporateName: { type: String, required: true },
-  name: { type: String, required: true },
-  cnpj: {
-    type: String,
-    /* match: /^\d{2}.\d{3}.\d{3}\/\d{4}-\d{2}$/, */
-    required: true,
-  },
-  ie: { type: String, /* match: /^\d{3}.\d{3}.\d{3}.\d{3}$/ */ },
-  im: { type: String, /* match: /^\d{7}\/\d{3}?-\d{1}$/ */ },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true,
-    lowercase: true,
-    /* match: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/, */
-  },
-  phone: {
-    type: String,
-    required: true,
-    /* match: /(^[0-9]{2})?(\s|-)?(9?[0-9]{4})-?([0-9]{4}$)/, */
-    required: true,
-  },
-
-  address: new Schema({
-    street: { type: String, required: true },
-    number: { type: String, required: true },
-    district: { type: String, required: true },
-    city: { type: String, required: true },
-    zipcode: {
+const BusinessSchema = new Schema(
+  {
+    corporateName: { type: String, required: true },
+    name: { type: String, required: true },
+    cnpj: {
+      type: String,
+      /* match: /^\d{2}.\d{3}.\d{3}\/\d{4}-\d{2}$/, */
+      required: true,
+    },
+    ie: { type: String /* match: /^\d{3}.\d{3}.\d{3}.\d{3}$/ */ },
+    im: { type: String /* match: /^\d{7}\/\d{3}?-\d{1}$/ */ },
+    email: {
       type: String,
       required: true,
-      /* match: /^([\d]{2}).?([\d]{3})-?([\d]{3})$/, */
+      unique: true,
+      trim: true,
+      lowercase: true,
+      /* match: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/, */
     },
-    state: {
+    phone: {
       type: String,
       required: true,
-      enum: [
-        "AC",
-        "AL",
-        "AP",
-        "AM",
-        "BA",
-        "CE",
-        "DF",
-        "ES",
-        "GO",
-        "MA",
-        "MT",
-        "MS",
-        "MG",
-        "PA",
-        "PB",
-        "PR",
-        "PE",
-        "PI",
-        "RJ",
-        "RN",
-        "RS",
-        "RO",
-        "RR",
-        "SC",
-        "SP",
-        "SE",
-        "TO",
-      ],
+      /* match: /(^[0-9]{2})?(\s|-)?(9?[0-9]{4})-?([0-9]{4}$)/, */
+      required: true,
     },
-  }),
 
-  businessImg: { type: String, default: "logo da empresa" },
+    address: new Schema({
+      street: { type: String, required: true },
+      number: { type: String, required: true },
+      district: { type: String, required: true },
+      city: { type: String, required: true },
+      zipcode: {
+        type: String,
+        required: true,
+        /* match: /^([\d]{2}).?([\d]{3})-?([\d]{3})$/, */
+      },
+      state: {
+        type: String,
+        required: true,
+        enum: [
+          "AC",
+          "AL",
+          "AP",
+          "AM",
+          "BA",
+          "CE",
+          "DF",
+          "ES",
+          "GO",
+          "MA",
+          "MT",
+          "MS",
+          "MG",
+          "PA",
+          "PB",
+          "PR",
+          "PE",
+          "PI",
+          "RJ",
+          "RN",
+          "RS",
+          "RO",
+          "RR",
+          "SC",
+          "SP",
+          "SE",
+          "TO",
+        ],
+      },
+    }),
 
-  owner: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    businessImg: { type: String, default: "logo da empresa" },
 
-  employee: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    owner: { type: Schema.Types.ObjectId, ref: "User", required: true },
 
-  products: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
+    employee: [{ type: Schema.Types.ObjectId, ref: "User" }],
 
-  businessIsActive: { type: Boolean, default: true },
-});
+    products: [{ type: Schema.Types.ObjectId, ref: "Product" }],
 
-const BusinessModel = mongoose.model("Business", BusinessSchema);
+    businessIsActive: { type: Boolean, default: true },
+  },
+  {
+    timestamps: true,
+  }
+);
 
-module.exports = BusinessModel;
+const BusinessModel = model("Business", BusinessSchema);
+
+export default BusinessModel;

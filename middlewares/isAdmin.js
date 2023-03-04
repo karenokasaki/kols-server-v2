@@ -1,8 +1,14 @@
-// Verificar se o usuário logado é Admin
-module.exports = (req, res, next) => {
-  if (req.currentUser.role === "ADMIN") {
-    return next();
-  } else {
-    return res.status(401).json({ msg: "You do not have permission to this!" });
+function isAdmin(req, res, next) {
+  try {
+    if (req.currentUser.role !== "ADMIN") {
+      return res.status(401).json({ msg: "User sem autorização" });
+    }
+
+    next();
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json(error);
   }
-};
+}
+
+export default isAdmin;

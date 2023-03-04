@@ -1,15 +1,14 @@
-// geração de token de acesso
-const jwt = require("jsonwebtoken");
+import jwt from "jsonwebtoken";
 
 function generateToken(user) {
-  const { _id, name, email } = user;
+  const { _id, email, role } = user;
 
   const signature = process.env.TOKEN_SIGN_SECRET;
-  const expiration = "6h";
+  const expiration = "12h";
 
-  return jwt.sign({ _id, name, email }, signature, {
+  return jwt.sign({ _id, email, role }, signature, {
     expiresIn: expiration,
   });
 }
 
-module.exports = generateToken;
+export default generateToken;

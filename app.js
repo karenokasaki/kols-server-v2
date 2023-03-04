@@ -1,26 +1,34 @@
-require("dotenv").config();
-require("./config/db.config")();
-const cors = require("cors");
-const express = require("express");
+import * as dotenv from "dotenv";
+dotenv.config();
+
+import cors from "cors";
+import express from "express";
+
+import connect from "./config/db.config.js";
+
+import userRouter from "./routes/users.routes.js";
+import businessRouter from "./routes/business.routes.js";
+import productsRouter from "./routes/products.routes.js";
+import uploadRouter from "./routes/upload.routes.js";
+import resetPasswordRouter from "./routes/resetPassword.routes.js";
+
 const app = express();
 app.use(express.json());
+
+connect();
+
 app.use(cors({ origin: process.env.REACT_APP_URL }));
 
-const userRouter = require("./routes/users.routes");
 app.use("/users", userRouter);
 
-const businessRouter = require("./routes/business.routes");
 app.use("/business", businessRouter);
 
-const productsRouter = require("./routes/products.routes");
 app.use("/products", productsRouter);
 
-const uploadRouter = require("./routes/upload.routes");
 app.use("/upload", uploadRouter);
 
-const resetPasswordRouter = require("./routes/resetPassword.routes");
 app.use("/resetPassword", resetPasswordRouter);
 
-app.listen(Number(process.env.PORT) || 4000, () => {
+app.listen(Number(process.env.PORT), () => {
   console.log(`Server up and ruining at - port: ${process.env.PORT}`);
 });

@@ -1,14 +1,11 @@
-// import jwt para token temporário
-const jwt = require("jsonwebtoken");
-// import nodemailer para envio do e-mail
-const nodemailer = require("nodemailer");
-// import bcrypt para criptografia da senha
-const bcrypt = require("bcrypt");
-// import router do express
-const express = require("express");
+import jwt from "jsonwebtoken";
+import nodemailer from "nodemailer";
+import bcrypt from "bcrypt";
+
+import express from "express";
 const router = express.Router();
-// import userModel schema
-const userModel = require("../models/User.model");
+
+import userModel from "../models/User.model.js";
 
 // config do nodemailer para envio de e-mail
 const transporter = nodemailer.createTransport({
@@ -163,4 +160,4 @@ router.get("/valid-token/:token", async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

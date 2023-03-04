@@ -1,14 +1,13 @@
-//importar o express
-const express = require("express");
-// instanciar as rotas pegando do express
+import express from "express";
+
+import BusinessModel from "../models/Business.model.js";
+import userModel from "../models/User.model.js";
+import logModel from "../models/Log.model.js";
+
+import isAuth from "../middlewares/isAuth.js";
+import attachCurrentUser from "../middlewares/attachCurrentUser.js";
+
 const router = express.Router();
-
-const BusinessModel = require("../models/Business.model");
-const userModel = require("../models/User.model");
-const logModel = require("../models/Log.model");
-
-const isAuth = require("../middlewares/isAuth");
-const attachCurrentUser = require("../middlewares/attachCurrentUser");
 
 // Rota para criar uma nova empresa
 router.post("/create-business", isAuth, attachCurrentUser, async (req, res) => {
@@ -42,7 +41,7 @@ router.post("/create-business", isAuth, attachCurrentUser, async (req, res) => {
     return res.status(201).json(newBusiness);
   } catch (error) {
     // retorna Internal Server Error
-    console.log(error)
+    console.log(error);
     return res.status(500).json({ msg: error.message });
   }
 });
@@ -133,7 +132,6 @@ router.patch(
   async (req, res) => {
     try {
       const { idBusinessDisable } = req.params;
-      const loggedUser = req.currentUser;
 
       const activeBusiness = await BusinessModel.findOneAndUpdate(
         { _id: idBusinessDisable },
@@ -161,7 +159,10 @@ router.get("/:idBusiness/log", isAuth, attachCurrentUser, async (req, res) => {
       return res.status(404).json({ msg: "User or Business is disable." });
     }
 
-    const log = await logModel.find({ business: idBusiness }).populate('nameProduct').populate('userName');
+    const log = await logModel
+      .find({ business: idBusiness })
+      .populate("nameProduct")
+      .populate("userName");
 
     return res.status(200).json(log);
   } catch (error) {
@@ -169,4 +170,6 @@ router.get("/:idBusiness/log", isAuth, attachCurrentUser, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;
+
+

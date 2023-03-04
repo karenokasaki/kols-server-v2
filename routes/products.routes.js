@@ -1,42 +1,39 @@
-//importar o express
-const express = require("express");
-// instanciar as rotas pegando do express
+import express from "express";
 const router = express.Router();
 
-const ProductsModel = require("../models/Products.model");
-const BusinessModel = require("../models/Business.model");
+import ProductsModel from "../models/Products.model.js";
+import BusinessModel from "../models/Business.model.js";
 
-const isAuth = require("../middlewares/isAuth");
-const attachCurrentUser = require("../middlewares/attachCurrentUser");
-const LogModel = require("../models/Log.model");
-const UserModel = require("../models/User.model");
+import isAuth from "../middlewares/isAuth.js";
+import attachCurrentUser from "../middlewares/attachCurrentUser.js";
+import LogModel from "../models/Log.model.js";
 
 // Rota para criar um produto
-router.post("/:idBusiness/create-product", isAuth, attachCurrentUser, async (req, res) => {
-  try {
-    const { idBusiness } = req.params
-    const loggedUser = req.currentUser;
+router.post(
+  "/:idBusiness/create-product",
+  isAuth,
+  attachCurrentUser,
+  async (req, res) => {
+    try {
+      const { idBusiness } = req.params;
+      const loggedUser = req.currentUser;
 
-    // Verifica se a conta do usuário está ativa.
-    if (!loggedUser.userIsActive) {
-      return res.status(404).json({ msg: "User disable account." });
+      const newProduct = await ProductsModel.create({
+        ...req.body,
+        business: idBusiness,
+      });
+
+      await BusinessModel.findOneAndUpdate(
+        { _id: idBusiness },
+        { $push: { products: newProduct._id } }
+      );
+
+      return res.status(201).json(newProduct);
+    } catch (error) {
+      return res.status(500).json({ msg: error.message });
     }
-
-    const newProduct = await ProductsModel.create({
-      ...req.body,
-      business: idBusiness,
-    });
-
-    await BusinessModel.findOneAndUpdate(
-      { _id: idBusiness },
-      { $push: { products: newProduct._id } }
-    );
-
-    return res.status(201).json(newProduct);
-  } catch (error) {
-    return res.status(500).json({ msg: error.message });
   }
-});
+);
 
 // Rota para buscar todos os produtos
 router.get("/:idBusiness", isAuth, attachCurrentUser, async (req, res) => {
@@ -44,12 +41,10 @@ router.get("/:idBusiness", isAuth, attachCurrentUser, async (req, res) => {
     const { idBusiness } = req.params;
     const loggedUser = req.currentUser;
 
-    // Verifica se a conta do usuário está ativa.
-    if (!loggedUser.userIsActive) {
-      return res.status(404).json({ msg: "User disable account." });
-    }
-
-    const products = await ProductsModel.find({ business: idBusiness });
+    const products = await ProductsModel.find(
+      { business: idBusiness },
+      { __v: 0 }
+    );
 
     return res.status(200).json(products);
   } catch (error) {
@@ -64,15 +59,13 @@ router.get("/product/:id", isAuth, attachCurrentUser, async (req, res) => {
   try {
     const loggedUser = req.currentUser;
 
-    // Verifica se a conta do usuário está ativa.
-    if (!loggedUser.userIsActive) {
-      return res.status(404).json({ msg: "User disable account." });
-    }
-
     // Seleciona o ID do product
-    const productId = await ProductsModel.findOne({
-      _id: id,
-    });
+    const productId = await ProductsModel.findOne(
+      {
+        _id: id,
+      },
+      { __v: 0 }
+    );
 
     return res.status(200).json(productId);
   } catch (error) {
@@ -89,13 +82,6 @@ router.patch(
     const { id } = req.params;
 
     try {
-      const loggedUser = req.currentUser;
-
-      // Verifica se a conta do usuário está ativa.
-      if (!loggedUser.userIsActive) {
-        return res.status(404).json({ msg: "User disable account." });
-      }
-
       const updateProduct = await ProductsModel.findOneAndUpdate(
         { _id: id },
         { ...req.body },
@@ -116,21 +102,12 @@ router.delete("/delete/:id", isAuth, attachCurrentUser, async (req, res) => {
   try {
     const loggedUser = req.currentUser;
 
-    // Verifica se a conta do usuário está ativa.
-    if (!loggedUser.userIsActive) {
-      return res.status(404).json({ msg: "User disable account." });
-    }
-
-    const businessId = await BusinessModel.findOne({
-      _id: loggedUser.business,
-    });
+    const deletedProduct = await ProductsModel.findOneAndDelete({ _id: id });
 
     await BusinessModel.findOneAndUpdate(
-      { _id: businessId._id },
+      { _id: deletedProduct.business },
       { $pull: { products: id } }
     );
-
-    const deletedProduct = await ProductsModel.findOneAndDelete({ _id: id });
 
     return res.status(200).json(deletedProduct);
   } catch (error) {
@@ -147,10 +124,9 @@ router.patch("/input-product", isAuth, attachCurrentUser, async (req, res) => {
 
     const productToUpdate = await ProductsModel.findOneAndUpdate(
       { _id: req.body._id },
-      { $set: { quantity: req.body.quantity + productSent.quantity } },
+      { $set: { quantity: +req.body.quantity + productSent.quantity } },
       { new: true }
     );
-    
 
     await LogModel.create({
       userName: loggedUser._id,
@@ -180,7 +156,7 @@ router.patch("/output-product", isAuth, attachCurrentUser, async (req, res) => {
 
     const productToUpdate = await ProductsModel.findOneAndUpdate(
       { _id: req.body._id },
-      { $set: { quantity: productSent.quantity - req.body.quantity } },
+      { $set: { quantity: productSent.quantity - +req.body.quantity } },
       { new: true }
     );
 
@@ -198,4 +174,4 @@ router.patch("/output-product", isAuth, attachCurrentUser, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;
