@@ -15,8 +15,6 @@ import resetPasswordRouter from "./routes/resetPassword.routes.js";
 const app = express();
 app.use(express.json());
 
-connect();
-
 app.use(cors({ origin: process.env.REACT_APP_URL }));
 
 app.use("/users", userRouter);
@@ -29,6 +27,8 @@ app.use("/upload", uploadRouter);
 
 app.use("/resetPassword", resetPasswordRouter);
 
-app.listen(Number(process.env.PORT), () => {
-  console.log(`Server up and ruining at - port: ${process.env.PORT}`);
+connect().then(() => {
+  app.listen(Number(process.env.PORT), () => {
+    console.log(`Server up and ruining at - port: ${process.env.PORT}`);
+  });
 });
